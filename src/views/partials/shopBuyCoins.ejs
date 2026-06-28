@@ -1,0 +1,89 @@
+<div class="main hero-unit white-text">
+	<legend class="white-text"><%= __("Buy Coins") %></legend>
+
+	<%_ if (!enabled || packages.length === 0 || providers.length === 0) { _%>
+		<div class="alert alert-error fade in" style="margin-top: 20px;">
+			<strong><%= __("Online top-up is currently unavailable.") %></strong>
+		</div>
+	<%_ } else { _%>
+
+	<p class="text-light"><%= __("Choose a package and a payment method. Coins are added to your balance automatically once the payment is confirmed.") %></p>
+
+	<div class="buycoins-providers" style="margin: 15px 0;">
+		<span class="text-light"><%= __("Payment method") %>:</span>
+		<%_ providers.forEach((provider, index) => { _%>
+			<button type="button" class="btn btn-small buycoins-provider <%= index === 0 ? 'btn-info active' : '' %>" data-provider="<%= provider.id %>">
+				<i class="fas fa-credit-card"></i> <%= provider.label %>
+			</button>
+		<%_ }) _%>
+	</div>
+
+	<div class="alert alert-error fade in" style="display: none;" id="buycoins_error">
+		<strong></strong>
+	</div>
+
+	<div class="row-fluid buycoins-grid">
+		<%_ packages.forEach(pkg => { _%>
+		<div class="span3">
+			<div class="well well-small text-center buycoins-card <%= pkg.popular ? 'buycoins-popular' : '' %>" style="position: relative;">
+				<%_ if (pkg.popular) { _%>
+					<span class="badge badge-warning" style="position: absolute; top: 8px; right: 8px;"><%= __("Best value") %></span>
+				<%_ } _%>
+				<h2 class="gold2" style="margin: 6px 0;">
+					<%= pkg.coins %> <i class="fas fa-coins"></i>
+				</h2>
+				<%_ if (pkg.bonus > 0) { _%>
+					<div class="text-success" style="margin-bottom: 6px;">+<%= pkg.bonus %> <%= __("bonus") %></div>
+				<%_ } _%>
+				<div class="text-light" style="margin-bottom: 10px; font-size: 16px;">
+					<%= pkg.price.toFixed(2) %> <%= currency %>
+				</div>
+				<button type="button" class="btn btn-large btn-info buycoins-buy" data-id="<%= pkg.id %>">
+					<%= __("Buy") %>
+				</button>
+			</div>
+		</div>
+		<%_ }) _%>
+	</div>
+
+	<%_ } _%>
+</div>
+
+<script type="text/javascript">
+	(function() {
+		var selectedProvider = $(".buycoins-provider.active").data("provider") ||
+			$(".buycoins-provider").first().data("provider");
+
+		$(".buycoins-provider").on("click", function() {
+			$(".buycoins-provider").removeClass("active btn-info");
+			$(this).addClass("active btn-info");
+			selectedProvider = $(this).data("provider");
+		});
+
+		$(".buycoins-buy").on("click", function() {
+			var $btn = $(this);
+			var packageId = $btn.data("id");
+
+			$("#buycoins_error").hide();
+
+			if (!selectedProvider) {
+				$("#buycoins_error").show().find("strong").html("<%= __('Please select a payment method.') %>");
+				return;
+			}
+
+			$(".buycoins-buy").prop("disabled", true);
+			$btn.html("<%= __('Redirecting...') %>");
+
+			shopCreatePayment(packageId, selectedProvider, function(result) {
+				if (result.ReturnCode == 0 && result.redirectUrl) {
+					window.location.href = result.redirectUrl;
+				} else {
+					$(".buycoins-buy").prop("disabled", false).html("<%= __('Buy') %>");
+					$("#buycoins_error").show().find("strong").html(
+						"<%= __('Could not start the payment.') %> #" + result.ReturnCode
+					);
+				}
+			});
+		});
+	})();
+</script>

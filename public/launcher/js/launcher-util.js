@@ -2,6 +2,22 @@ var DEBUG_STR = function(arg) {};
 var DEBUG_FMT = function() {};
 var DEBUG_FRAME = null;
 
+// Fallback for launcher.js play-button labels. Only launcherMain.ejs defines a
+// localized GAMESTART_BUTTON_STRINGS inline (before this file loads); the login /
+// signup / reset pages also load launcher.js but don't, which made launcher.js
+// throw "'GAMESTART_BUTTON_STRINGS' is undefined" when updating the button state.
+// The guard keeps the localized version on the main page and only fills in here.
+if (typeof window.GAMESTART_BUTTON_STRINGS === "undefined") {
+	window.GAMESTART_BUTTON_STRINGS = {
+		"btn-gamestart": "Play",
+		"btn-wrong": "Error",
+		"btn-wait": "Wait",
+		"btn-update": "Update",
+		"btn-break": "Abort",
+		"btn-repair": "Repair"
+	};
+}
+
 function DebugEnable() {
 	var frame = $("<div/>", {
 		id: "DebugArea",

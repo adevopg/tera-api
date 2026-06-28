@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title><%= __('TERA Shop') %></title>
+	<link rel="stylesheet" href="/public/shop/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/public/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/public/shop/css/core.css">
+	<script type="text/javascript" src="/public/shop/js/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+	<div class="container" style="max-width: 560px; margin: 0 auto; padding-top: 60px; text-align: center;">
+		<div class="hero-unit white-text">
+			<div id="pr_icon" style="font-size: 64px; margin-bottom: 10px;">
+				<i class="fas fa-spinner fa-spin"></i>
+			</div>
+			<h2 id="pr_title"><%= __("Processing payment...") %></h2>
+			<p class="text-light" id="pr_text"><%= __("Please wait while we confirm your payment.") %></p>
+			<p class="gold2" id="pr_balance" style="display: none; font-size: 18px;"></p>
+			<button class="btn btn-large btn-info" id="pr_back" style="margin-top: 15px;">
+				<%= __("Back to shop") %>
+			</button>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		var transactionId = "<%= transactionId %>";
+		var initialStatus = "<%= status %>";
+
+		function renderStatus(status, balance) {
+			if (status === "paid") {
+				$("#pr_icon").html('<i class="fas fa-check-circle text-success"></i>');
+				$("#pr_title").html("<%= __('Payment successful!') %>");
+				$("#pr_text").html("<%= __('Your coins have been added to your balance.') %>");
+				if (typeof balance !== "undefined") {
+					$("#pr_balance").show().html(balance + ' <i class="fas fa-coins"></i>');
+				}
+				return true;
+			}
+			if (status === "canceled" || status === "failed" || status === "unknown") {
+				$("#pr_icon").html('<i class="fas fa-times-circle text-error"></i>');
+				$("#pr_title").html("<%= __('Payment not completed') %>");
+				$("#pr_text").html("<%= __('No coins were added. If you were charged, please contact support.') %>");
+				return true;
+			}
+			return false;
+		}
+
+		$(function() {
+			$("#pr_back").on("click", function() {
+				if (window.history.length > 1) {
+					window.history.back();
+				} else {
+					window.location.href = "/shop/Main";
+				}
+			});
+
+			if (renderStatus(initialStatus)) {
+				return;
+			}
+
+			// Still pending: poll the transaction status for a short while.
+			var attempts = 0;
+			var poll = setInterval(function() {
+				attempts++;
+				$.post({
+					url: "/shop/PaymentStatus",
+					contentType: "application/json",
+					data: JSON.stringify({ transactionId: transactionId }),
+					dataType: "json",
+					success: function(result) {
+						if (result.ReturnCode === 0 && renderStatus(result.status, result.shopBalance)) {
+							clearInterval(poll);
+						}
+					}
+				});
+				if (attempts >= 15) {
+					clearInterval(poll);
+				}
+			}, 2000);
+		});
+	</script>
+</body>
+</html>

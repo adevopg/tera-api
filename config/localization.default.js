@@ -24,14 +24,15 @@ module.exports.defaultRegion = env.string("API_PORTAL_CLIENT_DEFAULT_REGION");
 //  "locales" - Locale codes for matching the language (ICU based).
 //  "region" - Localization code used by the game (ISO 3166-1 alpha-3 based).
 module.exports.localizations = [
-	// United Kingdom (EU)
+	// English -> región USA (DataCenter_Final_USA.dat, inglés nativo, intacto).
+	// El "English (EU)" original usaba EUR; ahora EUR está reservado al español.
 	{
 		language: "en",
-		locales: ["en", "en-GB"],
-		region: "EUR"
+		locales: ["en", "en-GB", "en-US"],
+		region: "USA"
 	},
 
-	// United States
+	// United States (mismo datacenter USA, etiqueta alternativa)
 	{
 		language: "us",
 		locales: ["en", "en-US"],
@@ -50,6 +51,15 @@ module.exports.localizations = [
 		language: "fr",
 		locales: ["fr", "fr-FR"],
 		region: "FRA"
+	},
+
+	// Español -> región EUR (DataCenter_Final_EUR.dat traducido al español).
+	// Se usa el slot EUR (región nativa de TERA) en vez de "ESP" porque el
+	// cliente no reconoce la región ESP y daría error en el check.
+	{
+		language: "es",
+		locales: ["es", "es-ES"],
+		region: "EUR"
 	},
 
 	// Japan

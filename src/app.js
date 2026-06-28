@@ -1,6 +1,6 @@
 "use strict";
 
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const APP_VERSION = process.env.npm_package_version || require("../package.json").version;
 
 /**
@@ -30,6 +30,7 @@ const APP_VERSION = process.env.npm_package_version || require("../package.json"
  * @property {import("./modules/geoip.module").geoip} geoip
  * @property {import("./modules/ipapi.module").ipapi} ipapi
  * @property {import("./modules/mailer.module").mailer} mailer
+ * @property {import("./modules/payment.module").payment} payment
  * @property {import("./lib/expressServer").app} app
  * @property {import("i18n")?} i18n
  */
@@ -106,6 +107,7 @@ async function loadModules() {
 	modules.geoip = await require("./modules/geoip.module")(modules);
 	modules.ipapi = await require("./modules/ipapi.module")(modules);
 	modules.mailer = await require("./modules/mailer.module")(modules);
+	modules.payment = await require("./modules/payment.module")(modules);
 
 	await modules.pluginsLoader.loadComponent("app.moduleLoader.after");
 

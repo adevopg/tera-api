@@ -38,7 +38,13 @@ class ExpressServer {
 		this.app.disable("x-powered-by");
 		this.app.disable("etag");
 
-		this.app.use(express.json());
+		// Keep the raw request body around so payment webhooks (e.g. Stripe)
+		// can verify their signatures against the exact bytes received.
+		this.app.use(express.json({
+			verify: (req, res, buf) => {
+				req.rawBody = buf;
+			}
+		}));
 		this.app.use(express.urlencoded({ extended: true }));
 		this.app.use(cookieParser());
 

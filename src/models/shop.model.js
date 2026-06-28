@@ -20,6 +20,7 @@
  * @property {import("sequelize").ModelCtor<Model<any, any>>} boxItems
  * @property {import("sequelize").ModelCtor<Model<any, any>>} coupons
  * @property {import("sequelize").ModelCtor<Model<any, any>>} couponActivated
+ * @property {import("sequelize").ModelCtor<Model<any, any>>} payTransactions
  */
 
 /**
@@ -40,7 +41,8 @@ module.exports = async (sequelize, DataTypes, syncTables, modules) => {
 		promoCodeStrings: require("./shop/shopPromoCodeStrings.model")(sequelize, DataTypes),
 		promoCodeActivated: require("./shop/shopPromoCodeActivated.model")(sequelize, DataTypes),
 		coupons: require("./shop/shopCoupons.model")(sequelize, DataTypes),
-		couponActivated: require("./shop/shopCouponActivated.model")(sequelize, DataTypes)
+		couponActivated: require("./shop/shopCouponActivated.model")(sequelize, DataTypes),
+		payTransactions: require("./shop/shopPayTransactions.model")(sequelize, DataTypes)
 	};
 
 	if (syncTables) {
@@ -56,6 +58,7 @@ module.exports = async (sequelize, DataTypes, syncTables, modules) => {
 		await model.promoCodeActivated.sync();
 		await model.coupons.sync();
 		await model.couponActivated.sync();
+		await model.payTransactions.sync();
 	}
 
 	// accounts
@@ -144,6 +147,13 @@ module.exports = async (sequelize, DataTypes, syncTables, modules) => {
 	});
 
 	model.couponActivated.hasOne(modules.accountModel.info, {
+		foreignKey: "accountDBID",
+		sourceKey: "accountDBID",
+		as: "account"
+	});
+
+	// payTransactions
+	model.payTransactions.hasOne(modules.accountModel.info, {
 		foreignKey: "accountDBID",
 		sourceKey: "accountDBID",
 		as: "account"

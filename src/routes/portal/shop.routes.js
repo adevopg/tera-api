@@ -19,6 +19,7 @@ const helpers = require("../../utils/helpers");
 const IpBlockHandler = require("../../utils/ipBlockHandler");
 const ApiError = require("../../lib/apiError");
 const portalShopController = require("../../controllers/portalShop.controller");
+const portalShopPaymentController = require("../../controllers/portalShopPayment.controller");
 
 /**
  * @param {modules} modules
@@ -30,6 +31,15 @@ module.exports = async modules => {
 
 	const ipBlock = new IpBlockHandler(modules.geoip, modules.ipapi, modules.logger);
 	const passport = new Passport();
+
+	// Payment provider webhooks. Registered before the session/ipBlock middlewares
+	// so external callbacks (Stripe, SumUp) are not subject to session creation or
+	// IP geo-blocking. Stripe verifies its own signature; SumUp status is re-fetched
+	// from the API, so neither endpoint trusts the request body for crediting.
+	modules.app.post("/shop/PaymentWebhookStripe", portalShopPaymentController.StripeWebhook(modules));
+	modules.app.post("/shop/PaymentWebhookPayPal", portalShopPaymentController.PayPalWebhook(modules));
+	// Paymentwall pingback is a GET request.
+	modules.app.get("/shop/PaymentPingbackPaymentwall", portalShopPaymentController.PaymentwallPingback(modules));
 	const i18n = new I18n({
 		staticCatalog: helpers.loadTranslations(path.resolve(__dirname, "../../locales/shop"), []),
 		defaultLocale: env.string("API_PORTAL_LOCALE"),
@@ -151,7 +161,14 @@ module.exports = async modules => {
 		.get("/PartialPromoCode", portalShopController.PartialPromoCodeHtml(mod))
 		.get("/PartialCoupons", portalShopController.PartialCouponsHtml(mod))
 		.get("/PartialWelcome", portalShopController.PartialWelcomeHtml(mod))
+		.get("/PartialBuyCoins", portalShopPaymentController.PartialBuyCoinsHtml(mod))
 		.post("/PartialProduct", portalShopController.PartialProductHtml(mod))
+
+		// Buy Coins (top-up)
+		.post("/GetCoinPackages", portalShopPaymentController.GetCoinPackages(mod))
+		.post("/CreatePayment", portalShopPaymentController.CreatePaymentAction(mod))
+		.post("/PaymentStatus", portalShopPaymentController.PaymentStatusAction(mod))
+		.get("/PaymentReturn", portalShopPaymentController.PaymentReturnHtml(mod))
 
 		// API
 		.post("/GetAccountInfo", portalShopController.GetAccountInfo(mod))

@@ -99,6 +99,18 @@ function shopCouponCancelAction(callback) {
 	return apiRequest("CouponCancelAction", {}, "json", callback);
 }
 
+function shopGetCoinPackages(callback) {
+	return apiRequest("GetCoinPackages", {}, "json", callback);
+}
+
+function shopCreatePayment(packageId, provider, callback) {
+	return apiRequest("CreatePayment", { packageId: packageId, provider: provider }, "json", callback);
+}
+
+function shopPaymentStatus(transactionId, callback) {
+	return apiRequest("PaymentStatus", { transactionId: transactionId }, "json", callback);
+}
+
 function apiRequest(event, params, dataType, callback) {
 	if (!params) {
 		return $.get("/shop/" + event, callback, dataType).fail(function(err) {

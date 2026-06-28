@@ -156,6 +156,26 @@ module.exports = async ({ gcCollect, checkComponent, pluginsLoader, localization
 				gcCollect();
 			}
 		}
+
+		// Language aliases: let a UI-only language (e.g. Spanish, which has no
+		// dedicated TERA datacenter) reuse another language's item datasheets.
+		// Configured via DATASHEET_LANGUAGE_ALIASES, e.g. "es:en,pt:en".
+		env.array("DATASHEET_LANGUAGE_ALIASES", []).forEach(pair => {
+			const [from, to] = pair.split(":").map(part => part.trim().toLowerCase());
+
+			if (!from || !to) {
+				return;
+			}
+
+			for (const section of Object.keys(datasheetModel)) {
+				const locales = datasheetModel[section];
+
+				if (locales && !locales.has(from) && locales.has(to)) {
+					locales.set(from, locales.get(to));
+					datasheetLogger.debug(`Datasheet aliased: ${section} (${from}) -> (${to})`);
+				}
+			}
+		});
 	} catch (err) {
 		datasheetLogger.error(err);
 		throw "";

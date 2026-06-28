@@ -530,5 +530,14 @@
 	"Versions Information": "Versions Information",
 	"Node.js Version": "Node.js Version",
 	"TERA API Version": "TERA API Version",
-	"DB Version": "DB Version"
+	"DB Version": "DB Version",
+	"Timer text": "Timer text",
+	"Timer start date": "Timer start date",
+	"Timer end date": "Timer end date",
+	"Panel color": "Panel color",
+	"Panel icon": "Panel icon",
+	"Panel small text": "Panel small text",
+	"Panel big text": "Panel big text",
+	"Button text": "Button text",
+	"Button link": "Button link"
 }
