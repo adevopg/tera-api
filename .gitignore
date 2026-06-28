@@ -2,6 +2,7 @@ node_modules/*
 config/*.js
 !config/*.default.js
 data/*
+tools/*
 !data/captcha-images/*.jpg
 !data/datasheets/*.txt
 !data/geoip/*.txt
@@ -19,3 +20,4 @@ package-lock.json
 .env
 Thumbs.db
 *.tmp
+node_modules
